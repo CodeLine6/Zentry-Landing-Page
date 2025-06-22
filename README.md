@@ -1,12 +1,25 @@
-# React + Vite
+# Landing Page Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This landing page project is built using React and Vite, utilizing Tailwind CSS for styling and GSAP for animations. It includes several sections such as Hero, About, Features, Story, Contact, and Footer.
 
-Currently, two official plugins are available:
+## Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   Modern UI design with smooth animations and transitions powered by GSAP.
+*   Responsive layout that adapts to different screen sizes.
+*   Modular component structure for easy maintenance and scalability.
+*   Use of custom fonts and Tailwind CSS for consistent styling.
 
-## Expanding the ESLint configuration
+## How to Run
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*   Make sure you have Node.js and npm installed.
+*   Clone the repository.
+*   Run `npm install` to install dependencies.
+*   Run `npm run dev` to start the development server.
+*   Open your browser and navigate to `http://localhost:3000`.
+
+## Contribution Guidelines
+
+*   Fork the repository.
+*   Create a new branch for your feature or bug fix.
+*   Make your changes and commit them with descriptive messages.
+*   Submit a pull request.
