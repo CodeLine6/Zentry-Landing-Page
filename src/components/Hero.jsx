@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti';
 import { useGSAP } from '@gsap/react';
@@ -8,22 +8,61 @@ import { ScrollTrigger } from 'gsap/all';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const useVideoPool = (totalVideos, getVideoSrc) => {
+  const [videoPool, setVideoPool] = useState({});
+  const [loadedCount, setLoadedCount] = useState(0);
+
+  useEffect(() => {
+    const loadVideos = async () => {
+      const pool = {};
+      
+      for (let i = 1; i <= totalVideos; i++) {
+        try {
+          const response = await fetch(getVideoSrc(i));
+          const blob = await response.blob();
+          const videoUrl = URL.createObjectURL(blob);
+          pool[i] = videoUrl;
+          setLoadedCount(prev => prev + 1);
+        } catch (error) {
+          console.error(`Failed to load video ${i}:`, error);
+        }
+      }
+      
+      setVideoPool(pool);
+    };
+
+    loadVideos();
+
+    // Cleanup function to revoke object URLs
+    return () => {
+      Object.values(videoPool).forEach(url => {
+        URL.revokeObjectURL(url);
+      });
+    };
+  }, []);
+
+  return { videoPool, loadedCount };
+};
+
+
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadedVideos, setLoadedVideos] = useState(0);
   const currentVideoRef = useRef(null);
-
+  
   const totalVideos = 4;
   const nextVdoRef = useRef(null);
-
+  
   const getVideoSrc = (index) => {
     return `/videos/hero-${index}.mp4`;
   }
+  
+  const { videoPool, loadedCount } = useVideoPool(totalVideos, getVideoSrc);
 
-   const handleVideoLoad = () => {
-    setLoadedVideos((prev) => prev + 1);
+  // Update your getVideoSrc function
+  const getVideoSource = (index) => {
+    return videoPool[index];
   };
 
   const upcomingVideoIndex = (currentIndex % totalVideos) + 1;
@@ -45,7 +84,7 @@ const Hero = () => {
           ease: 'power1.inOut',
           onStart: () => nextVdoRef.current.play(),
           onComplete: () => {
-             currentVideoRef.current.src = nextVdoRef.current.src+"#t="+parseFloat(nextVdoRef.current.currentTime + 0.038);
+             currentVideoRef.current.src = getVideoSource(currentIndex)+"#t="+parseFloat(nextVdoRef.current.currentTime + 0.038);
           }
         })
 
@@ -80,10 +119,11 @@ const Hero = () => {
   })
 
   useEffect(() => {
-    if(loadedVideos == totalVideos -1) {
+    if(loadedCount >= totalVideos) {
       setIsLoading(false);
     }
-  },[loadedVideos])
+  }, [loadedCount])
+
   return (
     <div className='relative h-dvh w-screen overflow-x-hidden'>
         {isLoading && (
@@ -100,31 +140,28 @@ const Hero = () => {
                 <div className='mask-clip-path absolute-center z-50 size-64 cursor-pointer overflow-hidden rounded-lg'>
                     <div onClick={handleMiniClick} className='origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100'>
                         <video 
-                            src={getVideoSrc(upcomingVideoIndex)}
+                            src={getVideoSource(upcomingVideoIndex)}
                             loop
                             muted
                             id="current-video"
                             className='size-64 origin-center scale-150 object-cover object-center'
-                            onLoadedData={handleVideoLoad}
                         />
                     </div>
                 </div>
                 <video 
                     ref={nextVdoRef}
-                    src={getVideoSrc(currentIndex)}
+                    src={getVideoSource(currentIndex)}
                     loop
                     muted
                     id="next-video"
                     className='absolute-center invisible z-20 size-64 object-cover object-center'
-                    onLoadedData={handleVideoLoad}
                 ></video>
-                <video src={getVideoSrc(1)} 
+                <video src={getVideoSource(1)} 
                     autoPlay
                     ref={currentVideoRef}
                     loop 
                     muted  
                     className='absolute left-0 top-0 size-full object-cover object-center'
-                    onLoadedData={handleVideoLoad} 
                 ></video>
             </div>
             <h1 className='special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75'>
